@@ -33,7 +33,7 @@ login_manager.init_app(app)
 class Selling(db.Model):
     idselling = db.Column(db.Integer, primary_key=True, autoincrement=True)
     costumer_idcostumer = db.Column(db.Integer, unique=False, nullable=False)
-    sold_at = db.Column(db.Datetime, unique=False, nullable=False)
+    sold_at = db.Column(db.DateTime, unique=False, nullable=False)
     cashback = db.Column(db.Float, unique=False, nullable=True)
 
 class Costumer(db.Model):
@@ -49,7 +49,7 @@ class Product_has_selling(db.Model):
 class Product(db.Model):
     idproduct = db.Column(db.Integer, primary_key=True, autoincrement=True)
     value = db.Column(db.Float, unique=False, nullable=True)
-    productType = db.Column(db.integer, unique=True, nullable=False)
+    productType = db.Column(db.Integer, unique=True, nullable=False)
 
 producttypes = ["A","B","C","D"]
 
@@ -64,7 +64,7 @@ def index():
 
 @app.route('/api/cashback', methods=['GET', 'POST'])
 def cashback():
-    enteringcostumer = {'headers': ['document', 'name'],
+    enteringcustomer = {'headers': ['document', 'name'],
                         'contents': []
                         }
 
@@ -74,8 +74,8 @@ def cashback():
                         }
 
 
-    entering = {'headers': ['sold_at', 'costumer', 'total', 'products'],
-                'contents': ["", enteringcostumer, "", enteringproducts ]
+    entering = {'headers': ['sold_at', 'customer', 'total', 'products'],
+                'contents': ["", enteringcustomer, "", enteringproducts ]
                 }
 
     if request.method == "POST":
@@ -84,9 +84,9 @@ def cashback():
             if sold_at != datetime.now():
                 return "Invalid date time"
             else:
-                if  Costumer.query.filter_by(name=entering.costumer.name).all():
-                    costumer = Costumer.query.filter_by(document=entering.costumer.document).all():
-                    if costumer:
+                if  Customer.query.filter_by(name=entering.customer.name).all():
+                    customer = Customer.query.filter_by(document=entering.customer.document).all()
+                    if customer:
                         totalsum = 0
                         for eachproduct in entering.products:
                             if eachproduct.value in producttypes:
@@ -97,19 +97,19 @@ def cashback():
                             return "Invalid total sum"
                         else:
                             cashback = totalsum * 0.05
-                            newselling = Selling(costumer_idcostumer=costumer.idcostumer, sold_at=sold_at, cashback=cashback)
+                            newselling = Selling(customer_idcustomer=customer.idcustomer, sold_at=sold_at, cashback=cashback)
                             for eachproduct in entering.products:
                                 thisproduct = Product.query.filter_by(productType=eachproduct.type).all()
                                 newPHS = Product_has_selling (product_idproduct=thisproduct.idproduct,sellin_idselling=newselling.idselling)
                                 db.session.add(newPHS)
                             db.session.add(newselling)
-                            db.session.commit(thispage)
+                            db.session.commit(thisproduct)
                             thisselling = Product_has_selling (idselling=newselling.idsellinselling.idselling).all()
                             return {
                                         "createdAt": sold_at,
                                         "message": "Cashback criado com sucesso!",
                                         "id": thisselling.idsellig,
-                                        "document": costumer.document,
+                                        "document": customer.document,
                                         "cashback": cashback
                             }
                     else:
@@ -117,16 +117,6 @@ def cashback():
                 else:
                     return "Invalid user name"
 
-
-
-
-
-        Selling.query.filter_by(group_idgroup=group.idgroup).all()
-
-
-
-            return "Logged in successfully."
-        return "Login Failed!"
 
     # user = User(UserName="arbusto", Password="werwer", Email="jenkins@leroy.com")
     # db.session.add(user)
