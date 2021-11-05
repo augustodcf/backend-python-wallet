@@ -32,11 +32,13 @@ login_manager.init_app(app)
 
 class Selling(db.Model):
     idselling = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    costumer_idcostumer = db.Column(db.Integer(), unique=False, nullable=False)
+    costumer_idcostumer = db.Column(db.Integer, unique=False, nullable=False)
     sold_at = db.Column(db.Datetime, unique=False, nullable=False)
     cashback = db.Column(db.Float, unique=False, nullable=True)
 
-
+class Costumer(db.Model):
+    idcostumer = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(45), unique=False, nullable=False)
 
 class Product_has_selling(db.Model):
     idproduct_has_selling = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -46,17 +48,10 @@ class Product_has_selling(db.Model):
 
 class Product(db.Model):
     idproduct = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    value = db.Column(db.Float(), unique=False, nullable=True)
-    ProductType_idProductType = db.Column(db.integer, unique=False, nullable=True)
+    value = db.Column(db.Float, unique=False, nullable=True)
+    productType = db.Column(db.integer, unique=True, nullable=False)
 
-class ProductType(db.Model):
-    idproductType = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    ProductTypeName = db.Column(db.Float(), unique=False, nullable=True)
-
-    def __repr__(self):
-        return '<User %r>' % self.username
-
-
+producttypes = ["A","B","C","D"]
 
 
 
@@ -67,12 +62,66 @@ def index():
 
 
 
-@app.route('/api/cashback ', methods=['GET', 'POST'])
+@app.route('/api/cashback', methods=['GET', 'POST'])
 def cashback():
+    enteringcostumer = {'headers': ['document', 'name'],
+                        'contents': []
+                        }
+
+
+    enteringproducts = {'headers': ['type', 'value', 'qty'],
+                        'contents': []
+                        }
+
+
+    entering = {'headers': ['sold_at', 'costumer', 'total', 'products'],
+                'contents': ["", enteringcostumer, "", enteringproducts ]
+                }
 
     if request.method == "POST":
+        entering = request.form
+        for sold_at in entering:
+            if sold_at != datetime.now():
+                return "Invalid date time"
+            else:
+                if  Costumer.query.filter_by(name=entering.costumer.name).all():
+                    costumer = Costumer.query.filter_by(document=entering.costumer.document).all():
+                    if costumer:
+                        totalsum = 0
+                        for eachproduct in entering.products:
+                            if eachproduct.value in producttypes:
+                                totalsum = totalsum + eachproduct.value
+                            else:
+                                return "One or all product type are invalid"
+                        if totalsum != entering.total:
+                            return "Invalid total sum"
+                        else:
+                            cashback = totalsum * 0.05
+                            newselling = Selling(costumer_idcostumer=costumer.idcostumer, sold_at=sold_at, cashback=cashback)
+                            for eachproduct in entering.products:
+                                thisproduct = Product.query.filter_by(productType=eachproduct.type).all()
+                                newPHS = Product_has_selling (product_idproduct=thisproduct.idproduct,sellin_idselling=newselling.idselling)
+                                db.session.add(newPHS)
+                            db.session.add(newselling)
+                            db.session.commit(thispage)
+                            thisselling = Product_has_selling (idselling=newselling.idsellinselling.idselling).all()
+                            return {
+                                        "createdAt": sold_at,
+                                        "message": "Cashback criado com sucesso!",
+                                        "id": thisselling.idsellig,
+                                        "document": costumer.document,
+                                        "cashback": cashback
+                            }
+                    else:
+                        return "Invalid user document"
+                else:
+                    return "Invalid user name"
 
 
+
+
+
+        Selling.query.filter_by(group_idgroup=group.idgroup).all()
 
 
 
