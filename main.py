@@ -75,14 +75,15 @@ def cashback():
 
         entering = request.get_json()
 
-        if entering(y["sold_at"]) > DateTime.now:
+        if entering["sold_at"].strip() > DateTime.now:
             return "Invalid date time"
         else:
-            if Customer.query.filter_by(name=entering.customer.name).all():
-                customer = Customer.query.filter_by(document=entering.customer.document).all()
-                if customer:
+            custumer = entering["customer"].strip
+            if Customer.query.filter_by(name=custumer.name).all():
+                existscustomer = Customer.query.filter_by(document=custumer.document).all()
+                if existscustomer:
                     totalsum = 0
-                    for eachproduct in entering.products:
+                    for eachproduct in entering["products"].strip:
                         if eachproduct.value in producttypes:
                             totalsum = totalsum + eachproduct.value
                         else:
@@ -91,14 +92,15 @@ def cashback():
                         return "Invalid total sum"
                     else:
                         cashback = totalsum * 0.05
-                        newselling = Selling(customer_idcustomer=customer.idcustomer, sold_at=sold_at, cashback=cashback)
-                        for eachproduct in entering.products:
+                        newselling = Sale(customer_idcustomer=existscustomer.idcustomer, sold_at=sold_at, cashback=cashback)
+                        for eachproduct in entering["products"].strip:
                             thisproduct = Product.query.filter_by(productType=eachproduct.type).all()
-                            newPHS = Product_has_selling (product_idproduct=thisproduct.idproduct,sellin_idselling=newselling.idselling)
+                            newPHS = Product_has_sale(product_idproduct=thisproduct.idproduct, sellin_idselling=newselling.idselling)
                             db.session.add(newPHS)
+
                         db.session.add(newselling)
-                        db.session.commit(thisproduct)
-                        thisselling = Product_has_selling (idselling=newselling.idsellinselling.idselling).all()
+                        db.session.commit()
+                        db.session.commit()
                         out = {
                                   "createdAt": "2021-07-26T22:50:55.740Z",
                                   "message": "Cashback criado com sucesso!",
