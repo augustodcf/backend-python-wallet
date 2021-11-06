@@ -57,7 +57,7 @@ producttypes = ["A","B","C","D"]
 
 @app.route("/")
 def index():
-    return render_template("beko/index.html")
+    return render_template("index.html")
 
 
 
@@ -80,6 +80,7 @@ def cashback():
 
     if request.method == "POST":
         entering = request.form
+        print (request.form)
         for sold_at in entering:
             if sold_at != datetime.now():
                 return "Invalid date time"
@@ -121,7 +122,8 @@ def cashback():
     # user = User(UserName="arbusto", Password="werwer", Email="jenkins@leroy.com")
     # db.session.add(user)
     # db.session.commit()
-    return render_template('/beko/login.html')  # , form=form))
+    print(request.form)
+    return "falhou"
 
 
 
