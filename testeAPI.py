@@ -46,7 +46,7 @@ def main ():
                 continue
             else:
                 raise Exception("fail during teste %s of endpoint %s: unexpected return %s"%(teste["entrada"],caso["api_endpoint"],retorno))
-        print ("done")
+
 
 main()
 
