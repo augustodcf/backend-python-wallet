@@ -80,9 +80,9 @@ def cashback():
 
     if request.method == "POST":
         entering = request.form
-        print (request.form)
+        #formatar a entrada de dados (vai dar um puta trabalho)
         for sold_at in entering:
-            if sold_at != datetime.now():
+            if sold_at > DateTime.now:
                 return "Invalid date time"
             else:
                 if  Customer.query.filter_by(name=entering.customer.name).all():
