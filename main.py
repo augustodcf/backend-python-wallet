@@ -1,6 +1,6 @@
 from typing import List
 
-from flask import Flask, escape, request, url_for, render_template, abort, flash, redirect, session
+from flask import Flask, escape, request, url_for, render_template, abort, flash, redirect, session, jsonify
 import json
 from controllers import blueprint
 from flask_sqlalchemy import SQLAlchemy
@@ -30,20 +30,20 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 
-class Selling(db.Model):
-    idselling = db.Column(db.Integer, primary_key=True, autoincrement=True)
+class Sale(db.Model):
+    idsale = db.Column(db.Integer, primary_key=True, autoincrement=True)
     costumer_idcostumer = db.Column(db.Integer, unique=False, nullable=False)
     sold_at = db.Column(db.DateTime, unique=False, nullable=False)
     cashback = db.Column(db.Float, unique=False, nullable=True)
 
-class Costumer(db.Model):
-    idcostumer = db.Column(db.Integer, primary_key=True, autoincrement=True)
+class Customer(db.Model):
+    idcustomer = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(45), unique=False, nullable=False)
 
 class Product_has_selling(db.Model):
-    idproduct_has_selling = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    idproduct_has_sale = db.Column(db.Integer, primary_key=True, autoincrement=True)
     product_idproduct = db.Column(db.Integer, unique=False, nullable=False)
-    selling_idselling = db.Column(db.Integer, unique=False, nullable=False)
+    sale_idsale = db.Column(db.Integer, unique=False, nullable=False)
     qty = db.Column(db.Integer, unique=False, nullable=True)
 
 class Product(db.Model):
@@ -67,14 +67,18 @@ def cashback():
 
 
     if request.method == "POST":
-        #parsint json to python
 
-        entering = json.loads(request.form)
+        if request.is_json():
+            pass
+        else:
+            return {}, 404
+
+        entering = request.get_json()
 
         if entering(y["sold_at"]) > DateTime.now:
             return "Invalid date time"
         else:
-            if  Customer.query.filter_by(name=entering.customer.name).all():
+            if Customer.query.filter_by(name=entering.customer.name).all():
                 customer = Customer.query.filter_by(document=entering.customer.document).all()
                 if customer:
                     totalsum = 0
@@ -96,13 +100,13 @@ def cashback():
                         db.session.commit(thisproduct)
                         thisselling = Product_has_selling (idselling=newselling.idsellinselling.idselling).all()
                         out = {
-                                    "createdAt": sold_at,
-                                    "message": "Cashback criado com sucesso!",
-                                    "id": thisselling.idsellig,
-                                    "document": customer.document,
-                                    "cashback": cashback
-                        }
-                        return json.dumps(out)
+                                  "createdAt": "2021-07-26T22:50:55.740Z",
+                                  "message": "Cashback criado com sucesso!",
+                                  "id": "NaN",
+                                  "document": "33535353535",
+                                  "cashback": "10"
+                                }
+                        return jsonify(out)
                 else:
                     return "Invalid user document"
             else:
