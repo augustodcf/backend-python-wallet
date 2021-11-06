@@ -1,6 +1,6 @@
 import requests
 
-HOST_ADDRESS = "localhost"
+HOST_ADDRESS = "http://localhost"
 HOST_PORT = "5000"
 
 casos_teste = [
@@ -41,11 +41,12 @@ casos_teste = [
 def main ():
     for caso in casos_teste:
         for teste in caso["teste_requests"]:
-            retorno = requests.request("POST","%s:%s%s"%(HOST_ADDRESS,HOST_PORT,caso["api_endpoint"]),teste["entrada"])
+            retorno = requests.post("%s:%s%s"%(HOST_ADDRESS,HOST_PORT,caso["api_endpoint"]), json=teste["entrada"])
             if retorno == teste["saida"] :
                 continue
             else:
                 raise Exception("fail during teste %s of endpoint %s: unexpected return %s"%(teste["entrada"],caso["api_endpoint"],retorno))
-
+        print ("done")
 
 main()
+
