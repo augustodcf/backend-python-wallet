@@ -11,7 +11,7 @@ from wtforms.validators import DataRequired
 from flask_debug import Debug
 from flask_bootstrap import Bootstrap
 from flask_nav import Nav
-from flask_nav.elements import Navbar, View, Subgroup, Separator, Text
+import json
 import os
 
 app = Flask(__name__)
@@ -64,59 +64,49 @@ def index():
 
 @app.route('/api/cashback', methods=['GET', 'POST'])
 def cashback():
-    enteringcustomer = {'headers': ['document', 'name'],
-                        'contents': []
-                        }
 
-
-    enteringproducts = {'headers': ['type', 'value', 'qty'],
-                        'contents': []
-                        }
-
-
-    entering = {'headers': ['sold_at', 'customer', 'total', 'products'],
-                'contents': ["", enteringcustomer, "", enteringproducts ]
-                }
 
     if request.method == "POST":
-        entering = request.form
-        #formatar a entrada de dados (vai dar um puta trabalho)
-        for sold_at in entering:
-            if sold_at > DateTime.now:
-                return "Invalid date time"
-            else:
-                if  Customer.query.filter_by(name=entering.customer.name).all():
-                    customer = Customer.query.filter_by(document=entering.customer.document).all()
-                    if customer:
-                        totalsum = 0
-                        for eachproduct in entering.products:
-                            if eachproduct.value in producttypes:
-                                totalsum = totalsum + eachproduct.value
-                            else:
-                                return "One or all product type are invalid"
-                        if totalsum != entering.total:
-                            return "Invalid total sum"
+        #parsint json to python
+
+        entering = json.loads(request.form)
+
+        if entering(y["sold_at"]) > DateTime.now:
+            return "Invalid date time"
+        else:
+            if  Customer.query.filter_by(name=entering.customer.name).all():
+                customer = Customer.query.filter_by(document=entering.customer.document).all()
+                if customer:
+                    totalsum = 0
+                    for eachproduct in entering.products:
+                        if eachproduct.value in producttypes:
+                            totalsum = totalsum + eachproduct.value
                         else:
-                            cashback = totalsum * 0.05
-                            newselling = Selling(customer_idcustomer=customer.idcustomer, sold_at=sold_at, cashback=cashback)
-                            for eachproduct in entering.products:
-                                thisproduct = Product.query.filter_by(productType=eachproduct.type).all()
-                                newPHS = Product_has_selling (product_idproduct=thisproduct.idproduct,sellin_idselling=newselling.idselling)
-                                db.session.add(newPHS)
-                            db.session.add(newselling)
-                            db.session.commit(thisproduct)
-                            thisselling = Product_has_selling (idselling=newselling.idsellinselling.idselling).all()
-                            return {
-                                        "createdAt": sold_at,
-                                        "message": "Cashback criado com sucesso!",
-                                        "id": thisselling.idsellig,
-                                        "document": customer.document,
-                                        "cashback": cashback
-                            }
+                            return "One or all product type are invalid"
+                    if totalsum != entering.total:
+                        return "Invalid total sum"
                     else:
-                        return "Invalid user document"
+                        cashback = totalsum * 0.05
+                        newselling = Selling(customer_idcustomer=customer.idcustomer, sold_at=sold_at, cashback=cashback)
+                        for eachproduct in entering.products:
+                            thisproduct = Product.query.filter_by(productType=eachproduct.type).all()
+                            newPHS = Product_has_selling (product_idproduct=thisproduct.idproduct,sellin_idselling=newselling.idselling)
+                            db.session.add(newPHS)
+                        db.session.add(newselling)
+                        db.session.commit(thisproduct)
+                        thisselling = Product_has_selling (idselling=newselling.idsellinselling.idselling).all()
+                        out = {
+                                    "createdAt": sold_at,
+                                    "message": "Cashback criado com sucesso!",
+                                    "id": thisselling.idsellig,
+                                    "document": customer.document,
+                                    "cashback": cashback
+                        }
+                        return json.dumps(out)
                 else:
-                    return "Invalid user name"
+                    return "Invalid user document"
+            else:
+                return "Invalid user name"
 
 
     # user = User(UserName="arbusto", Password="werwer", Email="jenkins@leroy.com")
