@@ -72,7 +72,7 @@ def cashback():
         print(entering)
 
         if entering == None:
-            return jsonify({"msg": "Missing JSON in request"}), 404
+            return jsonify({"message": "Missing JSON in request"}), 404
 
 
         datetime = entering["sold_at"].strip()
@@ -111,7 +111,7 @@ def cashback():
                                   "document": "33535353535",
                                   "cashback": "10"
                                 }
-                        print (jsonify(out))
+                        
                         return jsonify(out)
                 else:
                     return "Invalid user document"
