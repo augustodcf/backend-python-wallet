@@ -22,7 +22,7 @@ if not os.path.exists(app.config['UPLOAD_FOLDER']):
 Bootstrap(app)
 Debug(app)
 app.secret_key = b"""_5#y2L"F4Q8z\n\xec]/"""
-app.config["SQLALCHEMY_DATABASE_URI"] = """mysql://root:6=2Cxl{3t6}g[pD@localhost/medievalfights"""
+app.config["SQLALCHEMY_DATABASE_URI"] = """mysql://root:6=2Cxl{3t6}g[pD@localhost/mydb"""
 db = SQLAlchemy(app)
 nav = Nav()
 
@@ -38,7 +38,7 @@ class Sale(db.Model):
 
 class Customer(db.Model):
     idcustomer = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String(45), unique=False, nullable=False)
+    cname = db.Column(db.String(45), unique=False, nullable=False)
 
 class Product_has_selling(db.Model):
     idproduct_has_sale = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -82,8 +82,8 @@ def cashback():
             return "Invalid date time"
         else:
             custumer = entering["customer"].strip
-            if Customer.query.filter_by(name=custumer.name).all():
-                existscustomer = Customer.query.filter_by(document=custumer.document).all()
+            if Customer.query.filter_by(cname=custumer["name"]).all():
+                existscustomer = Customer.query.filter_by(document=custumer["document"]).all()
                 if existscustomer:
                     totalsum = 0
                     for eachproduct in entering["products"]:
