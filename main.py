@@ -67,7 +67,7 @@ def cashback():
 
 
     if request.method == "POST":
-        entering = request.get_json()
+        entering = json.loads(request.get_json())
 
         print(entering)
 
@@ -86,22 +86,22 @@ def cashback():
                 existscustomer = Customer.query.filter_by(document=custumer.document).all()
                 if existscustomer:
                     totalsum = 0
-                    for eachproduct in entering["products"].strip:
-                        if eachproduct.value in producttypes:
-                            totalsum = totalsum + eachproduct.value
+                    for eachproduct in entering["products"]:
+                        if eachproduct["type"] in producttypes:
+                            totalsum = totalsum + eachproduct["value"]
                         else:
                             return "One or all product type are invalid"
-                    if totalsum != entering.total:
+                    if totalsum != entering["total"]:
                         return "Invalid total sum"
                     else:
                         cashback = totalsum * 0.05
-                        newselling = Sale(customer_idcustomer=existscustomer.idcustomer, sold_at=sold_at, cashback=cashback)
-                        for eachproduct in entering["products"].strip:
-                            thisproduct = Product.query.filter_by(productType=eachproduct.type).all()
-                            newPHS = Product_has_sale(product_idproduct=thisproduct.idproduct, sellin_idselling=newselling.idselling)
+                        newsale = Sale(customer_idcustomer=existscustomer.idcustomer, sold_at=sold_at, cashback=cashback)
+                        for eachproduct in entering["products"]:
+                            thisproduct = Product.query.filter_by(productType=eachproduct["type"]).all()
+                            newPHS = Product_has_sale(product_idproduct=thisproduct.idproduct, sellin_idsale=newsale.idsale)
                             db.session.add(newPHS)
 
-                        db.session.add(newselling)
+                        db.session.add(newsale)
                         db.session.commit()
                         db.session.commit()
                         out = {
@@ -111,7 +111,7 @@ def cashback():
                                   "document": "33535353535",
                                   "cashback": "10"
                                 }
-                        
+
                         return jsonify(out)
                 else:
                     return "Invalid user document"
