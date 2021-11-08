@@ -43,6 +43,7 @@ def main ():
         for teste in caso["teste_requests"]:
             retorno = requests.post("%s:%s%s"%(HOST_ADDRESS,HOST_PORT,caso["api_endpoint"]), json=teste["entrada"])
             if retorno == teste["saida"] :
+                print(retorno)
                 continue
             else:
                 raise Exception("fail during teste %s of endpoint %s: unexpected return %s"%(teste["entrada"],caso["api_endpoint"],retorno))

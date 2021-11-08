@@ -33,7 +33,7 @@ login_manager.init_app(app)
 
 class Sale(db.Model):
     idsale = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    costumer_idcostumer = db.Column(db.Integer, unique=False, nullable=False)
+    customer_idcustomer = db.Column(db.Integer, unique=False, nullable=False)
     sold_at = db.Column(db.DateTime, unique=False, nullable=False)
     cashback = db.Column(db.Float, unique=False, nullable=True)
 
@@ -42,15 +42,15 @@ class Customer(db.Model):
     cname = db.Column(db.String(45), unique=False, nullable=False)
     document = db.Column(db.Numeric, unique=False, nullable=False)
 
-class Product_has_selling(db.Model):
+class Product_has_sale(db.Model):
     idproduct_has_sale = db.Column(db.Integer, primary_key=True, autoincrement=True)
     product_idproduct = db.Column(db.Integer, unique=False, nullable=False)
     sale_idsale = db.Column(db.Integer, unique=False, nullable=False)
-    qty = db.Column(db.Integer, unique=False, nullable=True)
+
 
 class Product(db.Model):
     idproduct = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    value = db.Column(db.Float, unique=False, nullable=True)
+    pvalue = db.Column(db.Numeric, unique=False, nullable=True)
     productType = db.Column(db.Integer, unique=True, nullable=False)
 
 producttypes = ["A","B","C","D"]
@@ -87,19 +87,24 @@ def cashback():
                     totalsum = int("0")
                     for eachproduct in entering["products"]:
                             totalsum = totalsum + (int(float(eachproduct["value"])) * eachproduct["qty"])
-                    if totalsum != entering["total"]:
+                    if totalsum != int(float(entering["total"])):
                         return jsonify({"message": "Invalid total sum"}), 404
                     else:
-                        cashback = totalsum * 0.05
-                        newsale = Sale(customer_idcustomer=existscustomer.idcustomer, sold_at=sold_at, cashback=cashback)
-                        for eachproduct in entering["products"]:
-                            thisproduct = Product.query.filter_by(productType=eachproduct["type"]).all()
-                            newPHS = Product_has_sale(product_idproduct=thisproduct.idproduct, sellin_idsale=newsale.idsale)
-                            db.session.add(newPHS)
+                        cashback = float(totalsum) * 0.05
+                        newsale = Sale(customer_idcustomer=existscustomer.idcustomer, sold_at=datetime.strptime(entering["sold_at"], '%Y-%m-%d %H:%M:%S'), cashback=cashback)
 
                         db.session.add(newsale)
                         db.session.commit()
-                        db.session.commit()
+                        thissale = Sale.query.filter_by(sold_at=datetime.strptime(entering["sold_at"], '%Y-%m-%d %H:%M:%S')).first()
+                        for eachproduct in reversed(entering["products"]):
+                            thisproduct = Product.query.filter_by(productType=eachproduct["type"]).first()
+                            newPHS = Product_has_sale(product_idproduct=thisproduct.idproduct, sale_idsale=thissale.idsale)
+                            db.session.add(newPHS)
+                            try:
+                                db.session.commit()
+                            except Exception as e:
+                                print(e)
+
                         out = {
                                   "createdAt": "2021-07-26T22:50:55.740Z",
                                   "message": "Cashback criado com sucesso!",
