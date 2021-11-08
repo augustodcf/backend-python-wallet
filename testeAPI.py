@@ -25,13 +25,13 @@ casos_teste = [
                                    }
                                 ],
                             },
-                         "saida": """{
+                         "saida": {
                                       "createdAt": "2021-07-26T22:50:55.740Z",
                                       "message": "Cashback criado com sucesso!",
                                       "id": "NaN",
                                       "document": "33535353535",
                                       "cashback": "10"
-                                    }"""},
+                                    }},
                         ]
 
      }
