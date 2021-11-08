@@ -107,7 +107,7 @@ def cashback():
                         for eachproduct in reversed(entering["products"]):
                             thisproduct = Product.query.filter_by(productType=eachproduct["type"]).first()
                             #verifies if the sale already has conection with this product
-                            if not Product_has_sale.query.filter_by(product_idproduct=thisproduct.idproduct, sale_idsale=thissale.idsale).first()
+                            if not Product_has_sale.query.filter_by(product_idproduct=thisproduct.idproduct, sale_idsale=thissale.idsale).first():
                                 #make it if not
                                 newPHS = Product_has_sale(product_idproduct=thisproduct.idproduct, sale_idsale=thissale.idsale)
                                 db.session.add(newPHS)
@@ -117,15 +117,14 @@ def cashback():
                                     print(e)
 
                         #responses
-                        out = {
+
+                        return jsonify({
                                   "createdAt": "2021-07-26T22:50:55.740Z",
                                   "message": "Cashback criado com sucesso!",
                                   "id": "NaN",
                                   "document": "33535353535",
                                   "cashback": "10"
-                                }
-
-                        return out
+                                }), 200
                 else:
                     return jsonify({"message": "Invalid user document"}), 404
             else:
