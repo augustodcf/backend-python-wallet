@@ -40,6 +40,7 @@ class Sale(db.Model):
 class Customer(db.Model):
     idcustomer = db.Column(db.Integer, primary_key=True, autoincrement=True)
     cname = db.Column(db.String(45), unique=False, nullable=False)
+    document = db.Column(db.Numeric, unique=False, nullable=False)
 
 class Product_has_selling(db.Model):
     idproduct_has_sale = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -83,12 +84,9 @@ def cashback():
             if Customer.query.filter_by(cname=customer["name"]).first():
                 existscustomer = Customer.query.filter_by(document=customer["document"]).first()
                 if existscustomer:
-                    totalsum = 0
+                    totalsum = int("0")
                     for eachproduct in entering["products"]:
-                        if eachproduct["type"] in producttypes:
-                            totalsum = totalsum + eachproduct["value"]
-                        else:
-                            return jsonify({"message": "One or all product type are invalid"}), 404
+                            totalsum = totalsum + (int(float(eachproduct["value"])) * eachproduct["qty"])
                     if totalsum != entering["total"]:
                         return jsonify({"message": "Invalid total sum"}), 404
                     else:
