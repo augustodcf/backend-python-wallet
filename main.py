@@ -76,12 +76,12 @@ def cashback():
         thisdatetime = datetime.strptime(entering["sold_at"], '%Y-%m-%d %H:%M:%S')
 
 
-        if thisdatetime > datetime.today():
+        if thisdatetime > datetime.strptime("2030-01-01 00:00:00", '%Y-%m-%d %H:%M:%S'):
             return jsonify({"message": "Invalid date time"}), 404
         else:
-            custumer = entering["customer"].strip
-            if Customer.query.filter_by(cname=custumer["name"]).all():
-                existscustomer = Customer.query.filter_by(document=custumer["document"]).all()
+            customer = entering["customer"]
+            if Customer.query.filter_by(cname=customer["name"]).first():
+                existscustomer = Customer.query.filter_by(document=customer["document"]).first()
                 if existscustomer:
                     totalsum = 0
                     for eachproduct in entering["products"]:
