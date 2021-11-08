@@ -73,11 +73,11 @@ def cashback():
         if entering == None:
             return jsonify({"message": "Missing JSON in request"}), 404
 
-        thisdatetime = datetime.strptime(entering["sold_at"], '%y-%m-%d %H:%M:%S')
+        thisdatetime = datetime.strptime(entering["sold_at"], '%Y-%m-%d %H:%M:%S')
 
 
         if thisdatetime > datetime.today():
-            return "Invalid date time"
+            return jsonify({"message": "Invalid date time"}), 404
         else:
             custumer = entering["customer"].strip
             if Customer.query.filter_by(cname=custumer["name"]).all():
@@ -88,9 +88,9 @@ def cashback():
                         if eachproduct["type"] in producttypes:
                             totalsum = totalsum + eachproduct["value"]
                         else:
-                            return "One or all product type are invalid"
+                            return jsonify({"message": "One or all product type are invalid"}), 404
                     if totalsum != entering["total"]:
-                        return "Invalid total sum"
+                        return jsonify({"message": "Invalid total sum"}), 404
                     else:
                         cashback = totalsum * 0.05
                         newsale = Sale(customer_idcustomer=existscustomer.idcustomer, sold_at=sold_at, cashback=cashback)
@@ -112,9 +112,9 @@ def cashback():
 
                         return jsonify(out)
                 else:
-                    return "Invalid user document"
+                    return jsonify({"message": "Invalid user document"}), 404
             else:
-                return "Invalid user name"
+                return jsonify({"message": "Invalid user name"}), 404
 
 
     # user = User(UserName="arbusto", Password="werwer", Email="jenkins@leroy.com")
