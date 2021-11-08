@@ -71,40 +71,52 @@ def cashback():
     if request.method == "POST":
         entering = request.get_json()
 
+        # verifies if the json has been send
         if entering == None:
             return jsonify({"message": "Missing JSON in request"}), 404
 
         thisdatetime = datetime.strptime(entering["sold_at"], '%Y-%m-%d %H:%M:%S')
 
-
+        #validates the date time
         if thisdatetime > datetime.strptime("2030-01-01 00:00:00", '%Y-%m-%d %H:%M:%S'):
             return jsonify({"message": "Invalid date time"}), 404
         else:
             customer = entering["customer"]
+            #verifies if the customer exists
             if Customer.query.filter_by(cname=customer["name"]).first():
                 existscustomer = Customer.query.filter_by(document=customer["document"]).first()
                 if existscustomer:
+                    # verifies if the sum of itens is ok
                     totalsum = int("0")
                     for eachproduct in entering["products"]:
                             totalsum = totalsum + (int(float(eachproduct["value"])) * eachproduct["qty"])
                     if totalsum != int(float(entering["total"])):
                         return jsonify({"message": "Invalid total sum"}), 404
                     else:
+                        #calculates the cashback
                         cashback = float(totalsum) * 0.05
-                        newsale = Sale(customer_idcustomer=existscustomer.idcustomer, sold_at=datetime.strptime(entering["sold_at"], '%Y-%m-%d %H:%M:%S'), cashback=cashback)
 
-                        db.session.add(newsale)
-                        db.session.commit()
-                        thissale = Sale.query.filter_by(sold_at=datetime.strptime(entering["sold_at"], '%Y-%m-%d %H:%M:%S')).first()
+                        #veries if is already this sale on the system
+                        if not Sale.query.filter_by(customer_idcustomer=existscustomer.idcustomer, sold_at=datetime.strptime(entering["sold_at"], '%Y-%m-%d %H:%M:%S')).first():
+                        #if not makes a new one
+                            newsale = Sale(customer_idcustomer=existscustomer.idcustomer, sold_at=datetime.strptime(entering["sold_at"], '%Y-%m-%d %H:%M:%S'), cashback=cashback)
+                            db.session.add(newsale)
+                            db.session.commit()
+                        thissale = Sale.query.filter_by(customer_idcustomer=existscustomer.idcustomer,sold_at=datetime.strptime(entering["sold_at"], '%Y-%m-%d %H:%M:%S')).first()
+                        #conect the products to the sale
                         for eachproduct in reversed(entering["products"]):
                             thisproduct = Product.query.filter_by(productType=eachproduct["type"]).first()
-                            newPHS = Product_has_sale(product_idproduct=thisproduct.idproduct, sale_idsale=thissale.idsale)
-                            db.session.add(newPHS)
-                            try:
-                                db.session.commit()
-                            except Exception as e:
-                                print(e)
+                            #verifies if the sale already has conection with this product
+                            if not Product_has_sale.query.filter_by(product_idproduct=thisproduct.idproduct, sale_idsale=thissale.idsale).first()
+                                #make it if not
+                                newPHS = Product_has_sale(product_idproduct=thisproduct.idproduct, sale_idsale=thissale.idsale)
+                                db.session.add(newPHS)
+                                try:
+                                    db.session.commit()
+                                except Exception as e:
+                                    print(e)
 
+                        #responses
                         out = {
                                   "createdAt": "2021-07-26T22:50:55.740Z",
                                   "message": "Cashback criado com sucesso!",
@@ -113,17 +125,13 @@ def cashback():
                                   "cashback": "10"
                                 }
 
-                        return jsonify(out)
+                        return out
                 else:
                     return jsonify({"message": "Invalid user document"}), 404
             else:
                 return jsonify({"message": "Invalid user name"}), 404
 
 
-    # user = User(UserName="arbusto", Password="werwer", Email="jenkins@leroy.com")
-    # db.session.add(user)
-    # db.session.commit()
-    print(request.form)
     return "falhou"
 
 
