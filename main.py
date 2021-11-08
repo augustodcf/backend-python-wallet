@@ -11,6 +11,7 @@ from wtforms.validators import DataRequired
 from flask_debug import Debug
 from flask_bootstrap import Bootstrap
 from flask_nav import Nav
+from datetime import datetime
 import json
 import os
 
@@ -67,18 +68,15 @@ def cashback():
 
 
     if request.method == "POST":
-        entering = json.loads(request.get_json())
-
-        print(entering)
+        entering = request.get_json()
 
         if entering == None:
             return jsonify({"message": "Missing JSON in request"}), 404
 
+        thisdatetime = entering["sold_at"]
 
-        datetime = entering["sold_at"].strip()
 
-
-        if datetime > DateTime.now:
+        if thisdatetime > datetime.today():
             return "Invalid date time"
         else:
             custumer = entering["customer"].strip

@@ -5,7 +5,7 @@ HOST_PORT = "5000"
 
 casos_teste = [
     {"api_endpoint": "/api/cashback",
-     "teste_requests": [{"entrada":"""{
+     "teste_requests": [{"entrada":{
                                 "sold_at": "2026-01-02 00:00:00",
                                 "customer": {
                                    "document": "00000000000",
@@ -24,7 +24,7 @@ casos_teste = [
                                       "qty": 9,
                                    }
                                 ],
-                            }""",
+                            },
                          "saida": """{
                                       "createdAt": "2021-07-26T22:50:55.740Z",
                                       "message": "Cashback criado com sucesso!",
